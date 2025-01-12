@@ -4,6 +4,7 @@ import com.sd.prj_mvc_model.BO.PagamentosBO;
 import com.sd.prj_mvc_model.objetos.Fornecedores;
 import com.sd.prj_mvc_model.objetos.Pagamentos;
 import com.sd.prj_mvc_view.FormCadastroPagamentos;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class ControllerCadastroPagamentos {
             lstPagamentos = pagamentosBO.getPagamentos(descricao);
             view.clearCmbPagamentos();
             lstPagamentos.forEach(pagamentos -> {
-                view.setCmbDespesas(String.format("%d | %s | %.2f", 
+                view.setCmbPagamentos(String.format("%d | %s | %.2f", 
                     pagamentos.getId(), 
                     pagamentos.getDescricao(), 
                     pagamentos.getValor(),
@@ -38,119 +39,91 @@ public class ControllerCadastroPagamentos {
     public void preencherComboFornecedores(FormCadastroPagamentos view) {
         String nome = view.getTxtNomeFornecedores();
         if (!nome.isEmpty()) {
-            lstFornecedores = fDAO.get(nome);
-            view.clearCmbCategorias();
-            lstDespesas.forEach(categoria -> {
-                view.setCmbCategorias(String.format("%d | %s", 
-                    categoria.getCategorias().getId(), 
-                    categoria.getCategorias().getNome()));
+            lstFornecedores = pagamentosBO.getPagamentosFornecedores(nome);
+            view.clearCmbFornecedores();
+            lstFornecedores.forEach(fornecedor -> {
+                view.setCmbFornecedores(String.format("%d | %s", 
+                    fornecedor.getId(), 
+                    fornecedor.getNome()));
             });
         } else {
-            view.clearCmbCategorias();
+            view.clearCmbFornecedores();
         }
     }
     
-    public void preencherComboOrcamentos(FormCadastroDespesas view) {
-        String descricao = view.getTxtDescricaoOrcamentos();
-        if (!descricao.isEmpty()) {
-            lstOrcamentos = despesasBO.getDespesas1(descricao);
-            view.clearCmbOrcamentos();
-            lstDespesas.forEach(orcamento -> {
-                view.setCmbOrcamentos(String.format("%d | %s | %.2f | %s", 
-                    orcamento.getOrcamentos().getId(), 
-                    orcamento.getOrcamentos().getDescricao(), 
-                    orcamento.getOrcamentos().getValorTotal(),
-                    orcamento.getOrcamentos().getStatus()));
-            });
-        } else {
-            view.clearCmbOrcamentos();
+    
+    public void preencherCombo(int id, FormCadastroPagamentos view) {
+        Pagamentos pagamentos = pagamentosBO.getPagamentos(id);
+        if (pagamentos != null) {
+            view.clearCmbPagamentos();
+            view.setCmbPagamentos(String.format("%d | %s | %.2f | %s | %d | %d",
+                pagamentos.getId(),
+                pagamentos.getDescricao(),
+                pagamentos.getValor(),
+                pagamentos.getData(),
+                pagamentos.getFornecedor_id().getId()));
+            preencherCampos(pagamentos, view);
         }
     }
     
-    public void preencherCombo(int id, FormCadastroDespesas view) {
-        Despesas despesa = despesasBO.getDespesas(id);
-        if (despesa != null) {
-            view.clearCmbDespesas();
-            view.setCmbDespesas(String.format("%d | %s | %.2f | %s | %d | %d",
-                despesa.getId(),
-                despesa.getDescricao(),
-                despesa.getValor(),
-                despesa.getData(),
-                despesa.getCategorias().getId(),
-                despesa.getOrcamentos().getId()));
-            preencherCampos(despesa, view);
-        }
-    }
-    
-    private void preencherCampos(Despesas despesa, FormCadastroDespesas view) {
-        if (despesa == null) return;
+    private void preencherCampos(Pagamentos pagamento, FormCadastroPagamentos view) {
+        if (pagamento == null) return;
 
         // Limpar campos antes de preencher
-        view.clearCmbCategorias();
-        view.clearCmbOrcamentos();
-
+        view.clearCmbFornecedores();
+  
         // Preencher campos básicos
-        view.setTxtCodigo(String.valueOf(despesa.getId()));
-        view.setTxtDescricao(despesa.getDescricao());
-        view.setTxtValor(String.valueOf(despesa.getValor()));
-        view.setTxtData(despesa.getData());
+        view.setTxtCodigo(String.valueOf(pagamento.getId()));
+        view.setTxtDescricao(pagamento.getDescricao());
+        view.setTxtValor(String.valueOf(pagamento.getValor()));
+        view.setTxtData(pagamento.getData());
 
         // Preencher categoria com verificação null
-        Categorias categoria = despesa.getCategorias();
-        if (categoria != null) {
-            view.setCmbCategorias(categoria.getNome() + " | " + categoria.getId());
-        }
-
-        // Preencher orçamento com verificação null
-        Orcamentos orcamento = despesa.getOrcamentos();
-        if (orcamento != null) {
-            view.setCmbOrcamentos(orcamento.getId() + " - " + despesa.getDescricao() + 
-                                " | " + orcamento.getValorTotal() + " | " + 
-                                orcamento.getStatus());
+        Fornecedores fornecedores = pagamento.getFornecedor_id();
+        if (fornecedores != null) {
+            view.setCmbFornecedores(fornecedores.getNome() + " | " + fornecedores.getId());
         }
 
         view.setBtnSalvarEnabled(false);
     }
     
-    public void preencherCampos(FormCadastroDespesas view) {
-        if (!lstDespesas.isEmpty()) {
+    public void preencherCampos(FormCadastroPagamentos view) {
+        if (!lstPagamentos.isEmpty()) {
             int index = view.getCmbDespesasSelectedIndex();
             if (index >= 0) {
-                Despesas despesa = lstDespesas.get(index);
-                preencherCampos(despesa, view);
+                Pagamentos pagamento = lstPagamentos.get(index);
+                preencherCampos(pagamento, view);
             }
         }
     }
     
-    public void novo(FormCadastroDespesas view) {
-        view.clearCmbDespesas();
+    public void novo(FormCadastroPagamentos view) {
+        view.clearCmbPagamentos();
         view.setTxtCodigo("");
         view.setTxtDescricao("");
         view.setTxtValor("");
         view.setTxtData("");
-        view.clearCmbCategorias(); 
-        view.clearCmbOrcamentos();
+        view.clearCmbFornecedores(); 
         view.setBtnSalvarEnabled(true);
-        lstDespesas = new ArrayList<>();
+        lstFornecedores = new ArrayList<>();
     }
     
-    public boolean salvar(FormCadastroDespesas view) {
+    public boolean salvar(FormCadastroPagamentos view) {
         try {
-            Despesas despesa = new Despesas();
-            despesa.setDescricao(view.getTxtDescricao());
-            despesa.setValor(new BigDecimal(view.getTxtValor().replace(",", ".")));
-            despesa.setData(view.getTxtData());
+            Pagamentos pagamentos = new Pagamentos();
+            pagamentos.setDescricao(view.getTxtDescricao());
+            pagamentos.setValor(new BigDecimal(view.getTxtValor().replace(",", ".")));
+            pagamentos.setData(view.getTxtData());
             
             // Corrigir para usar os valores dos ComboBoxes corretamente
-            Categorias categoria = lstCategorias.get(view.getCmbCategorias());
-            Orcamentos orcamento = lstOrcamentos.get(view.getCmbOrcamentos());
+            Fornecedores fornecedor = lstFornecedores.get(view.getCmbFornecedores());
+           
+            pagamentos.setFornecedor_id(fornecedor);
             
-            despesa.setCategoria(categoria);
-            despesa.setOrcamento(orcamento); 
-            
-            despesa = despesasBO.Salvar(despesa);
-            if (despesa.getId() != -1) {
-                view.setTxtCodigo(String.valueOf(despesa.getId()));
+ 
+            pagamentos = pagamentosBO.Salvar(pagamentos);
+            if (pagamentos.getId() != -1) {
+                view.setTxtCodigo(String.valueOf(pagamentos.getId()));
                 return true;
             }
             return false;
@@ -159,32 +132,30 @@ public class ControllerCadastroPagamentos {
         }
     }
     
-    public void editar(FormCadastroDespesas view) {
+    public void editar(FormCadastroPagamentos view) {
         try {
-            Despesas despesa = new Despesas(); // Corrigir tipo
-            despesa.setId(Integer.parseInt(view.getTxtCodigo()));
-            despesa.setDescricao(view.getTxtDescricao());
-            despesa.setValor(new BigDecimal(view.getTxtValor().replace(",", ".")));
-            despesa.setData(view.getTxtData());
+            Pagamentos pagamento = new Pagamentos(); // Corrigir tipo
+            pagamento.setId(Integer.parseInt(view.getTxtCodigo()));
+            pagamento.setDescricao(view.getTxtDescricao());
+            pagamento.setValor(new BigDecimal(view.getTxtValor().replace(",", ".")));
+            pagamento.setData(view.getTxtData());
             
             // Corrigir para usar os valores dos ComboBoxes corretamente
-            Categorias categoria = lstCategorias.get(view.getCmbCategorias());
-            Orcamentos orcamento = lstOrcamentos.get(view.getCmbOrcamentos());
+            Fornecedores fornecedor = lstFornecedores.get(view.getCmbFornecedores());
             
-            despesa.setCategoria(categoria);
-            despesa.setOrcamento(orcamento);
+            pagamento.setFornecedor_id(fornecedor);
             
-            despesasBO.Editar(despesa);
+            pagamentosBO.Editar(pagamento);
         } catch (NumberFormatException e) {
             // Handle the error appropriately
         }
     }
     
-    public boolean excluir(FormCadastroDespesas view) {
+    public boolean excluir(FormCadastroPagamentos view) {
         try {
-            Despesas despesa = new Despesas();
-            despesa.setId(Integer.parseInt(view.getTxtCodigo()));
-            return despesasBO.Excluir(despesa) == 1;
+            Pagamentos pagamento = new Pagamentos();
+            pagamento.setId(Integer.parseInt(view.getTxtCodigo()));
+            return pagamentosBO.Excluir(pagamento) == 1;
         } catch (NumberFormatException e) {
             return false;
         }

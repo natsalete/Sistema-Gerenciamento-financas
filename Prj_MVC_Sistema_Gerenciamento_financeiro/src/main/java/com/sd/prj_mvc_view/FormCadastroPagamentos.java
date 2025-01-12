@@ -1,6 +1,6 @@
 package com.sd.prj_mvc_view;
 
-import com.sd.prj_mvc_controller.ControllerCadastroDespesas;
+import com.sd.prj_mvc_controller.ControllerCadastroPagamentos;
 import com.sd.prj_mvc_model.objetos.Fornecedores;
 import javax.swing.JFormattedTextField;
 import javax.swing.JOptionPane;
@@ -8,27 +8,27 @@ import javax.swing.text.MaskFormatter;
 
 public class FormCadastroPagamentos extends javax.swing.JFrame {
 
-    private final ControllerCadastroDespesas controller;
+    private final ControllerCadastroPagamentos controller;
     private MaskFormatter FormatoData;
     private int id;
 
     public FormCadastroPagamentos(int id) {
         initComponents();
-        controller = new ControllerCadastroDespesas();
+        controller = new ControllerCadastroPagamentos();
         controller.preencherCombo(id, this);
     }
 
     public FormCadastroPagamentos() {
         initComponents();
-        controller = new ControllerCadastroDespesas();
+        controller = new ControllerCadastroPagamentos();
     }
     
     // Métodos de acesso aos componentes da interface
-    public void setCmbDespesas(String item) {
+    public void setCmbPagamentos(String item) {
         cmbDespesas.addItem(item);
     }
 
-    public void clearCmbDespesas() {
+    public void clearCmbPagamentos() {
         cmbDespesas.removeAllItems();
     }
       
@@ -93,7 +93,7 @@ public class FormCadastroPagamentos extends javax.swing.JFrame {
         }
     }
     
-   public void clearCmbFornecedores() {
+    public void clearCmbFornecedores() {
         cmbFornecedores.removeAllItems();
     }
     
@@ -481,7 +481,7 @@ public class FormCadastroPagamentos extends javax.swing.JFrame {
 
     private void txtNomeFornecedorestxtNomeClienteCaretUpdate(javax.swing.event.CaretEvent evt) {//GEN-FIRST:event_txtNomeFornecedorestxtNomeClienteCaretUpdate
         // TODO add your handling code here:
-        controller.preencherComboCategorias(this);
+        controller.preencherComboFornecedores(this);
     }//GEN-LAST:event_txtNomeFornecedorestxtNomeClienteCaretUpdate
 
     private void txtValorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtValorActionPerformed
