@@ -1,392 +1,155 @@
-﻿# Sistema-Gerenciamento-financas
-# Material de Estudos: Padrões de Projeto (Design Patterns)
+# Sistema de Gerenciamento de Finanças
 
-## 1. Padrão Adapter
+## Visão Geral
 
-### Conceito
-O Adapter é um padrão estrutural que permite que interfaces incompatíveis trabalhem juntas. Ele atua como um wrapper entre dois objetos, convertendo a interface de uma classe em outra interface que o cliente espera.
+O **Sistema de Gerenciamento de Finanças** é uma aplicação voltada para a gestão de despesas, orçamentos e transações financeiras. Ele permite que empresas ou indivíduos organizem e monitorem seus gastos de forma eficiente.
 
-### Quando Usar
-- Quando você precisa usar uma classe existente, mas sua interface não é compatível
-- Para reutilizar classes existentes que não possuem a interface que você necessita
-- Para criar uma classe reutilizável que coopere com classes que não possuem interfaces compatíveis
+## Padrões de Projeto Utilizados
 
-### Exemplo Prático
-```java
-// Interface esperada pelo cliente
-interface MediaPlayer {
-    void play(String filename);
-}
+O sistema foi desenvolvido seguindo padrões de projeto para garantir escalabilidade e manutenção fácil:
 
-// Interface incompatível
-interface AdvancedMediaPlayer {
-    void playMp4(String filename);
-    void playVlc(String filename);
-}
+- **Criacionais:**
 
-// Implementação do Advanced Player
-class VlcPlayer implements AdvancedMediaPlayer {
-    public void playVlc(String filename) {
-        System.out.println("Tocando arquivo VLC: " + filename);
-    }
-    public void playMp4(String filename) {
-        // não faz nada
-    }
-}
+  - **Padrão Singleton**: Usado para a conexão com o banco de dados.
+  - **Padrão Fábrica**: Implementado para a criação dos DAOs (Data Access Objects).
 
-// Adapter
-class MediaAdapter implements MediaPlayer {
-    AdvancedMediaPlayer advancedMusicPlayer;
+- **Estrutural:**
 
-    public MediaAdapter(String audioType) {
-        if(audioType.equalsIgnoreCase("vlc")) {
-            advancedMusicPlayer = new VlcPlayer();
-        }
-    }
+  - **Padrão Adaptador**: Pode ser implementado para compatibilizar diferentes tipos de bancos de dados.
 
-    public void play(String filename) {
-        advancedMusicPlayer.playVlc(filename);
-    }
-}
-```
+- **Comportamental:**
 
-## 2. Padrão Composite
+  - **Padrão Observador**: Usado para atualização de orçamentos em tempo real.
 
-### Conceito
-O Composite é um padrão estrutural que permite compor objetos em estruturas de árvore e trabalhar com essas estruturas como se fossem objetos individuais.
+## Arquitetura do Sistema
 
-### Quando Usar
-- Quando você precisa implementar uma estrutura de objetos do tipo árvore
-- Quando os clientes precisam tratar tanto objetos individuais quanto composições de objetos de maneira uniforme
+A aplicação segue o padrão **MVC (Model-View-Controller)**:
 
-### Exemplo Prático
-```java
-// Componente base
-abstract class ArquivoSistema {
-    protected String nome;
-    
-    public ArquivoSistema(String nome) {
-        this.nome = nome;
-    }
-    
-    abstract void mostrar();
-}
+- **Modelo (Model):** Classes de entidade e DAOs.
+- **Visão (View):** Interface gráfica implementada em **Swing/JavaFX**.
+- **Controlador (Controller):** Classes responsáveis pela lógica de negócios e interação entre Model e View.
 
-// Folha
-class Arquivo extends ArquivoSistema {
-    public Arquivo(String nome) {
-        super(nome);
-    }
-    
-    public void mostrar() {
-        System.out.println("Arquivo: " + nome);
-    }
-}
+## Funcionalidades
 
-// Composite
-class Diretorio extends ArquivoSistema {
-    private List<ArquivoSistema> arquivos = new ArrayList<>();
-    
-    public Diretorio(String nome) {
-        super(nome);
-    }
-    
-    public void adicionar(ArquivoSistema arquivo) {
-        arquivos.add(arquivo);
-    }
-    
-    public void mostrar() {
-        System.out.println("Diretório: " + nome);
-        for(ArquivoSistema arquivo : arquivos) {
-            arquivo.mostrar();
-        }
-    }
-}
-```
+### 1. Gerenciamento de Categorias
 
-## 3. Padrão Factory
+- Criar e listar categorias de despesas (exemplo: "Aluguel", "Marketing", "Equipamentos").
+- Facilita a organização e o filtro de despesas.
 
-### Conceito
-O Factory é um padrão criacional que fornece uma interface para criar objetos em uma superclasse, mas permite que as subclasses alterem o tipo de objetos que serão criados.
+### 2. Controle de Orçamentos
 
-### Quando Usar
-- Quando uma classe não pode antecipar a classe de objetos que deve criar
-- Quando você quer delegar a responsabilidade de criação de objetos para subclasses
-- Quando você quer encapsular a criação de objetos
+- Criar orçamentos com um valor total definido e um período específico.
+- Monitoramento de despesas associadas a cada orçamento.
+- Validação para evitar estouro do orçamento.
 
-### Exemplo Prático
-```java
-// Produto
-interface Animal {
-    void fazerSom();
-}
+### 3. Registro de Despesas
 
-// Produtos Concretos
-class Cachorro implements Animal {
-    public void fazerSom() {
-        System.out.println("Au Au!");
-    }
-}
+- Associar despesas a categorias e orçamentos.
+- Exemplo:
+  - **Categoria:** Marketing
+  - **Despesa:** Criação de site
+  - **Valor:** R\$ 1.500,00
+  - **Orçamento:** Janeiro de 2025
 
-class Gato implements Animal {
-    public void fazerSom() {
-        System.out.println("Miau!");
-    }
-}
+### 4. Gestão de Transações
 
-// Factory
-class AnimalFactory {
-    public Animal criarAnimal(String tipo) {
-        if (tipo.equalsIgnoreCase("cachorro")) {
-            return new Cachorro();
-        } else if (tipo.equalsIgnoreCase("gato")) {
-            return new Gato();
-        }
-        return null;
-    }
-}
-```
+- Registro de **entradas** (receitas) e **saídas** (pagamentos).
+- Atualiza automaticamente os valores do orçamento.
+- Exemplo:
+  - **Entrada:** Receita de R\$ 5.000,00
+  - **Saída:** Pagamento de fornecedor de R\$ 2.000,00
 
-## 4. Padrão Observer
+### 5. Controle de Pagamentos
 
-### Conceito
-O Observer é um padrão comportamental que define uma dependência um-para-muitos entre objetos, de modo que quando um objeto muda de estado, todos os seus dependentes são notificados e atualizados automaticamente.
+- Registro de pagamentos realizados para despesas.
+- Exemplo:
+  - **Despesa:** Compra de equipamentos
+  - **Pagamento:** R\$ 1.000,00 realizado em 10/01/2025
+- Benefício: Facilita o rastreamento de pagamentos realizados e pendentes.
 
-### Quando Usar
-- Quando uma mudança em um objeto requer mudanças em outros
-- Quando um objeto precisa notificar outros objetos sem fazer suposições sobre quem são esses objetos
-- Quando você precisa manter consistência entre objetos relacionados
+### 6. Cadastro de Fornecedores
 
-### Exemplo Prático
-```java
-// Subject Interface
-interface Subject {
-    void registrarObserver(Observer o);
-    void removerObserver(Observer o);
-    void notificarObservers();
-}
+- Registro de fornecedores vinculados às despesas.
+- Exemplo:
+  - **Nome:** ABC Equipamentos
+  - **Telefone:** (11) 99999-8888
+  - **Email:** [contato@abcequipamentos.com](mailto\:contato@abcequipamentos.com)
+- Benefício: Organização e facilidade de contato com fornecedores.
 
-// Observer Interface
-interface Observer {
-    void update(String mensagem);
-}
+### 7. Itens de Orçamento
 
-// Concrete Subject
-class Canal implements Subject {
-    private List<Observer> observers = new ArrayList<>();
-    private String ultimoVideo;
-    
-    public void registrarObserver(Observer o) {
-        observers.add(o);
-    }
-    
-    public void removerObserver(Observer o) {
-        observers.remove(o);
-    }
-    
-    public void notificarObservers() {
-        for (Observer observer : observers) {
-            observer.update(ultimoVideo);
-        }
-    }
-    
-    public void publicarVideo(String video) {
-        this.ultimoVideo = video;
-        notificarObservers();
-    }
-}
+- Permite detalhar os itens de um orçamento.
+- Exemplo:
+  - **Orçamento:** Janeiro de 2025
+  - **Item:** Serviços de limpeza
+  - **Quantidade:** 2
+  - **Valor unitário:** R\$ 300,00
+  - **Valor total:** R\$ 600,00
 
-// Concrete Observer
-class Inscrito implements Observer {
-    private String nome;
-    
-    public Inscrito(String nome) {
-        this.nome = nome;
-    }
-    
-    public void update(String video) {
-        System.out.println(nome + " recebeu notificação do vídeo: " + video);
-    }
-}
-```
+### 8. Controle de Usuários
 
-## 5. Padrão Singleton
+- Permite o cadastro e autenticação de usuários.
+- Exemplo:
+  - **Nome:** Natália
+  - **Email:** [natalia@email.com](mailto\:natalia@email.com)
+  - **Senha:** (armazenada de forma segura com hashing)
 
-### Conceito
-O Singleton é um padrão criacional que garante que uma classe tenha apenas uma instância e fornece um ponto global de acesso a ela.
+## Fluxo Geral do Sistema
 
-### Quando Usar
-- Quando você precisa de exatamente uma instância de uma classe
-- Quando você precisa de controle estrito sobre variáveis globais
-- Quando você precisa compartilhar estado entre diferentes partes da aplicação
+1. **Cadastro de Dados Básicos:**
 
-### Exemplo Prático
-```java
-public class ConfiguracaoSistema {
-    private static ConfiguracaoSistema instancia;
-    private Map<String, String> configuracoes;
-    
-    private ConfiguracaoSistema() {
-        configuracoes = new HashMap<>();
-    }
-    
-    public static ConfiguracaoSistema getInstancia() {
-        if (instancia == null) {
-            synchronized (ConfiguracaoSistema.class) {
-                if (instancia == null) {
-                    instancia = new ConfiguracaoSistema();
-                }
-            }
-        }
-        return instancia;
-    }
-    
-    public void setConfiguracao(String chave, String valor) {
-        configuracoes.put(chave, valor);
-    }
-    
-    public String getConfiguracao(String chave) {
-        return configuracoes.get(chave);
-    }
-}
-```
+   - O administrador cadastra categorias e fornecedores.
+   - Usuários são criados para acessar o sistema.
 
-## 6. Padrão Template
+2. **Criação de Orçamentos:**
 
-### Conceito
-O Template é um padrão comportamental que define o esqueleto de um algoritmo em um método, deixando alguns passos para serem implementados pelas subclasses. O padrão permite que as subclasses redefinam certos passos de um algoritmo sem mudar sua estrutura.
+   - O usuário define o valor total e o período do orçamento.
 
-### Quando Usar
-- Quando você tem vários algoritmos que possuem estruturas similares
-- Quando você quer evitar duplicação de código
-- Quando você quer permitir que as subclasses alterem certos passos do algoritmo
+3. **Registro de Despesas:**
 
-### Exemplo Prático
-```java
-abstract class Bebida {
-    // Método template
-    final void prepararBebida() {
-        ferverAgua();
-        adicionarIngredientes();
-        if (clienteQuerCondimentos()) {
-            adicionarCondimentos();
-        }
-        colocarNaXicara();
-    }
-    
-    abstract void adicionarIngredientes();
-    abstract void adicionarCondimentos();
-    
-    void ferverAgua() {
-        System.out.println("Fervendo água");
-    }
-    
-    void colocarNaXicara() {
-        System.out.println("Colocando na xícara");
-    }
-    
-    // Hook method
-    boolean clienteQuerCondimentos() {
-        return true;
-    }
-}
+   - As despesas são registradas, associadas a categorias e orçamentos.
 
-class Cafe extends Bebida {
-    void adicionarIngredientes() {
-        System.out.println("Passando o café");
-    }
-    
-    void adicionarCondimentos() {
-        System.out.println("Adicionando açúcar e leite");
-    }
-}
-```
+4. **Gestão de Transações:**
 
-## 7. Padrão MVC (Model-View-Controller)
+   - Entradas e saídas financeiras são registradas e vinculadas aos orçamentos.
 
-### Conceito
-O MVC é um padrão arquitetural que divide uma aplicação em três componentes principais:
-- Model: Gerencia os dados e a lógica de negócio
-- View: Apresenta os dados ao usuário
-- Controller: Gerencia a interação do usuário e atualiza Model e View
+5. **Registro de Pagamentos:**
 
-### Quando Usar
-- Em aplicações web
-- Quando você precisa de uma clara separação entre dados, apresentação e lógica
-- Quando você quer permitir a modificação independente de cada componente
+   - Pagamentos são associados às despesas.
 
-### Exemplo Prático
-```java
-// Model
-class Usuario {
-    private String nome;
-    private String email;
-    
-    public Usuario(String nome, String email) {
-        this.nome = nome;
-        this.email = email;
-    }
-    
-    // getters e setters
-}
+## Tecnologias Utilizadas
 
-// View
-class UsuarioView {
-    public void mostrarDetalhes(String nome, String email) {
-        System.out.println("Usuário:");
-        System.out.println("Nome: " + nome);
-        System.out.println("Email: " + email);
-    }
-}
+- **Linguagem:** Java
+- **Banco de Dados:** MySQL / PostgreSQL (compatível com outros bancos via Adaptador)
+- **Interface Gráfica:** Swing / JavaFX
+- **Padrões de Projeto:** Singleton, Fábrica, Adaptador, Observador
+- **Arquitetura:** MVC (Model-View-Controller)
 
-// Controller
-class UsuarioController {
-    private Usuario model;
-    private UsuarioView view;
-    
-    public UsuarioController(Usuario model, UsuarioView view) {
-        this.model = model;
-        this.view = view;
-    }
-    
-    public void atualizarView() {
-        view.mostrarDetalhes(model.getNome(), model.getEmail());
-    }
-    
-    public void setUsuarioNome(String nome) {
-        model.setNome(nome);
-    }
-    
-    public void setUsuarioEmail(String email) {
-        model.setEmail(email);
-    }
-}
-```
+## Como Executar o Projeto
 
-## Dicas para a Prova
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/natsalete/Sistema-Gerenciamento-financas.git
+   ```
+2. Configure o banco de dados e ajuste as credenciais no arquivo de conexão.
+3. Compile e execute a aplicação Java:
+   ```bash
+   javac Main.java
+   java Main
+   ```
 
-1. **Diferencie os tipos de padrões:**
-   - Criacionais (Factory, Singleton)
-   - Estruturais (Adapter, Composite)
-   - Comportamentais (Observer, Template)
-   - Arquiteturais (MVC)
+## Contribuição
 
-2. **Pontos-chave para cada padrão:**
-   - Adapter: Compatibilidade entre interfaces
-   - Composite: Estrutura em árvore
-   - Factory: Criação flexível de objetos
-   - Observer: Notificação de mudanças
-   - Singleton: Instância única
-   - Template: Esqueleto de algoritmo
-   - MVC: Separação de responsabilidades
+Ficamos felizes com contribuições! Para contribuir:
 
-3. **Identifique os cenários de uso:**
-   - Analise o problema apresentado
-   - Identifique as características que indicam qual padrão usar
-   - Considere as vantagens e desvantagens de cada padrão
+1. Fork o repositório
+2. Crie uma branch para sua funcionalidade (`git checkout -b minha-feature`)
+3. Commit suas alterações (`git commit -m "Adicionando nova funcionalidade"`)
+4. Envie para o repositório (`git push origin minha-feature`)
+5. Abra um Pull Request
 
-4. **Práticas de implementação:**
-   - Mantenha o código limpo e organizado
-   - Use nomes descritivos para classes e métodos
-   - Siga os princípios SOLID
-   - Documente decisões importantes
+## Licença
+
+Este projeto está sob a licença MIT - consulte o arquivo LICENSE para mais detalhes.
+
+---
